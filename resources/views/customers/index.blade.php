@@ -7,10 +7,11 @@
 
             <div class="card" >
                 <div class="card-body pb-5">
-                    <form action="{{ route('customers.store')}}" method="POST">
+                    <form action="{{ route('customers.store')}}" method="POST" enctype="multipart/form-data">
                         @csrf 
                         @method('POST')
                         <input type="text" placeholder="Nama" name="nama" class="form-control mb-2">
+                        <input type="file" placeholder="Your Profile" name="profil_img" class="form-control mb-2">
                         <textarea name="alamat" id="" placeholder="Alamat" class="form-control mb-2"></textarea>
                         <input type="text" placeholder="No Telpon" name="no_telpon" class="form-control mb-2">
                         <input type="email" placeholder="Email" name="email" class="form-control mb-3">
@@ -27,6 +28,7 @@
                         <tr>
                             <th>No</th>
                             <th>Nama</th>
+                            <th>Foto</th>
                             <th>Alamat</th>
                             <th>No Telpon</th>
                             <th>Email</th>
@@ -39,6 +41,7 @@
                         <tr>
                             <td>{{ $index + 1}}</td>
                             <td>{{ $item->nama}}</td>
+                            <td><img src="{{asset($item->profil_img)}}" alt=""  height="100px" widht="100px"></td>
                             <td>{{ $item->alamat}}</td>
                             <td>{{ $item->no_telpon}}</td>
                             <td>{{ $item->email}}</td>

@@ -31,12 +31,23 @@ class CustomersController extends Controller
     {
         $request->validate([
             'nama'=> 'required',
+            'profil_img' => 'required',
             'alamat'=> 'required',
             'no_telpon'=> 'required',
             'email'=> 'required',
 
         ]);
-        Customers::create($request->all());
+        //upload image to public
+        $imageName = time().'.'.$request->profil_img->extension();
+        $request->profil_img->move(public_path('profil_img'), $imageName);
+
+        Customers::create([
+            'nama' => $request->nama,
+            'profil_img' => 'profil_img/'.$imageName,
+            'alamat' => $request->alamat,
+            'no_telpon' => $request->no_telpon,
+            'email' => $request->email,
+        ]);
         return redirect()->route('customers.index');
     }
 
@@ -51,7 +62,7 @@ class CustomersController extends Controller
     /**
      * Show the form for editing the specified resource.
      */
-    public function edit(Customers $customers)
+    public function edit(Customers $customers, string $id)
     {
         $customers = Customers::findOrFail($id);
         return view('customers.edit',compact('customers'));
@@ -60,7 +71,7 @@ class CustomersController extends Controller
     /**
      * Update the specified resource in storage.
      */
-    public function update(Request $request, Customers $customers)
+    public function update(Request $request, string $id)
     {
         $request->validate([
             'nama'=> 'required',
@@ -69,14 +80,36 @@ class CustomersController extends Controller
             'email'=> 'required',
         ]);
         $customers = Customers::findOrFail($id);
-        $customers->update($request->all());
+        if ($request->hasFile('profil_img')) {
+            $request->validate([
+                'profil_img' => 'image|mimes:jpeg,png,jpg,gif|max:2048'
+            ]);
+    
+            // Hapus foto lama jika ada
+            if ($customers->profil_img && file_exists(public_path($customers->profil_img))) {
+                unlink(public_path($customers->profil_img));
+            }
+    
+            // Simpan foto baru
+            $imageName = time().'.'.$request->profil_img->extension();
+            $request->profil_img->move(public_path('profil_img'), $imageName);
+            $customers->profil_img = 'profil_img/'.$imageName;
+        }
+        $customers->update(
+        [
+            'nama' => $request->nama,
+            'alamat' => $request->alamat,
+            'no_telpon' => $request->no_telpon,
+            'email' => $request->email,
+        ]    
+        );
         return redirect()->route('customers.index');
     }
 
     /**
      * Remove the specified resource from storage.
      */
-    public function destroy(Customers $customers)
+    public function destroy(string $id)
     {
         $customers = Customers::findOrFail($id);
         $customers->delete();
